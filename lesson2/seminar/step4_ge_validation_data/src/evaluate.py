@@ -1,8 +1,11 @@
+import json
 import pickle
 import pandas as pd
 import yaml
+import os
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
+import mlflow
 
 
 def load_params():
@@ -28,8 +31,25 @@ def evaluate_model():
     y_pred = model.predict(X_test)
     accuracy = accuracy_score(y_test, y_pred)
 
-    print(f"Accuracy: {accuracy:.4f}")
+    num_rows = len(df)
+    metrics = {
+        "accuracy": float(accuracy),
+        "num_rows": int(num_rows)
+    }
+
+    os.makedirs("metrics", exist_ok=True)
+    with open("metrics/metrics.json", "w") as f:
+        json.dump(metrics, f, indent=4)
+
+    mlflow.log_metrics(metrics)
+
+    mlflow.log_artifact("metrics/metrics.json")
+
+    print(f"Metrics saved: accuracy={accuracy:.4f}, num_rows={num_rows}")
+    print(f"Metrics logged to MLflow and saved to metrics/metrics.json")
 
 
+# Запуск MLflow run
 if __name__ == "__main__":
-    evaluate_model()
+    with mlflow.start_run():
+        evaluate_model()
