@@ -43,6 +43,7 @@ stages:
       - metrics/metrics.json
 
   validate_model:
+    cmd: python src/validate_model.py
     deps:
       - src/validate_model.py
       - models/model.pkl
